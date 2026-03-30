@@ -1,0 +1,44 @@
+// ===========================
+// Colores principales
+// ===========================
+$color-primary: #2563eb;      // Azul principal
+$color-secondary: #64748b;    // Gris azulado
+$color-success: #22c55e;      // Verde - pagado/activo
+$color-danger: #ef4444;       // Rojo - mora/vencido
+$color-warning: #f59e0b;      // Amarillo - pendiente
+$color-background: #f8fafc;   // Fondo general
+$color-text: #1e293b;         // Texto principal
+$color-text-light: #94a3b8;   // Texto secundario
+$color-white: #ffffff;
+$color-border: #e2e8f0;       // Bordes de tarjetas/tablas
+
+// ===========================
+// Tipografía
+// ===========================
+$font-family-base: 'Inter', sans-serif;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 24px;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// ===========================
+// Espaciado
+// ===========================
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// ===========================
+// Bordes y sombras
+// ===========================
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+$box-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
