@@ -109,14 +109,18 @@ const routes = [
   { path: '/ahorros', name: 'savings', component: SavingsView },
   { path: '/prestamos', name: 'loans', component: LoansView },
   { path: '/ganancias', name: 'profits', component: ProfitsView },
-  { path: '/solicitar-prestamo', name: 'loanRequest', component: LoanRequestView },
+  {
+    path: '/solicitar-prestamo',
+    name: 'loanRequest',
+    component: LoanRequestView,
+  },
   { path: '/admin/socios', name: 'members', component: MembersView },
-  { path: '/:pathMatch(.*)*', redirect: '/login' }
+  { path: '/:pathMatch(.*)*', redirect: '/login' },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 })
 
 export default router
