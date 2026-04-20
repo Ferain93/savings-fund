@@ -1,126 +1,120 @@
-// import { createRouter, createWebHistory } from 'vue-router'
-// import { useAuthStore } from '../stores/auth'
-
-// // Auth
-// import LoginView from '../views/LoginView.vue'
-
-// // Compartidas
-// import HomeView from '../views/HomeView.vue'
-// import SavingsView from '../views/SavingsView.vue'
-// import LoansView from '../views/LoansView.vue'
-// import ProfitsView from '../views/ProfitsView.vue'
-
-// // Socio
-// import LoanRequestView from '../views/LoanRequestView.vue'
-
-// // Admin
-// import MembersView from '../views/MembersView.vue'
-
-// const authMiddleware = (to, from, next) => {
-//   const auth = useAuthStore()
-//   if (!auth.isAuthenticated) return next('/login')
-//   return next()
-// }
-
-// const adminMiddleware = (to, from, next) => {
-//   const auth = useAuthStore()
-//   if (!auth.isAuthenticated) return next('/login')
-//   if (auth.user?.role !== 'admin') return next('/')
-//   return next()
-// }
-
-// const routes = [
-//   // Pública
-//   {
-//     path: '/login',
-//     name: 'login',
-//     component: LoginView
-//   },
-
-//   // Compartidas (socio y admin)
-//   {
-//     path: '/',
-//     name: 'home',
-//     component: HomeView,
-//     beforeEnter: authMiddleware
-//   },
-//   {
-//     path: '/ahorros',
-//     name: 'savings',
-//     component: SavingsView,
-//     beforeEnter: authMiddleware
-//   },
-//   {
-//     path: '/prestamos',
-//     name: 'loans',
-//     component: LoansView,
-//     beforeEnter: authMiddleware
-//   },
-//   {
-//     path: '/ganancias',
-//     name: 'profits',
-//     component: ProfitsView,
-//     beforeEnter: authMiddleware
-//   },
-
-//   // Solo socio
-//   {
-//     path: '/solicitar-prestamo',
-//     name: 'loanRequest',
-//     component: LoanRequestView,
-//     beforeEnter: authMiddleware
-//   },
-
-//   // Solo admin
-//   {
-//     path: '/admin/socios',
-//     name: 'members',
-//     component: MembersView,
-//     beforeEnter: adminMiddleware
-//   },
-
-//   // Fallback
-//   {
-//     path: '/:pathMatch(.*)*',
-//     redirect: '/login'
-//   }
-// ]
-
-// const router = createRouter({
-//   history: createWebHistory(import.meta.env.BASE_URL),
-//   routes
-// })
-
-// export default router
-
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
+// Auth
 import LoginView from '../views/LoginView.vue'
+
+// Compartidas
 import HomeView from '../views/HomeView.vue'
 import SavingsView from '../views/SavingsView.vue'
 import LoansView from '../views/LoansView.vue'
 import ProfitsView from '../views/ProfitsView.vue'
+
+// Solo socio
 import LoanRequestView from '../views/LoanRequestView.vue'
+
+// Solo admin
 import MembersView from '../views/MembersView.vue'
 
+// Errores
+import Error403View from '../views/Error403View.vue'
+
 const routes = [
-  { path: '/login', name: 'login', component: LoginView },
-  { path: '/', name: 'home', component: HomeView },
-  { path: '/ahorros', name: 'savings', component: SavingsView },
-  { path: '/prestamos', name: 'loans', component: LoansView },
-  { path: '/ganancias', name: 'profits', component: ProfitsView },
+  // ── Pública ──────────────────────────────────────────────────────
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: { public: true },
+  },
+
+  // ── Error ─────────────────────────────────────────────────────────
+  {
+    path: '/403',
+    name: 'forbidden',
+    component: Error403View,
+    meta: { public: true },
+  },
+
+  // ── Compartidas (socio y admin) ───────────────────────────────────
+  {
+    path: '/',
+    name: 'home',
+    component: HomeView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/ahorros',
+    name: 'savings',
+    component: SavingsView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/prestamos',
+    name: 'loans',
+    component: LoansView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/ganancias',
+    name: 'profits',
+    component: ProfitsView,
+    meta: { requiresAuth: true },
+  },
+
+  // ── Solo socio ───────────────────────────────────────────────────
   {
     path: '/solicitar-prestamo',
     name: 'loanRequest',
     component: LoanRequestView,
+    meta: { requiresAuth: true, role: 'socio' },
   },
-  { path: '/admin/socios', name: 'members', component: MembersView },
-  { path: '/:pathMatch(.*)*', redirect: '/login' },
+
+  // ── Solo admin ───────────────────────────────────────────────────
+  {
+    path: '/admin/socios',
+    name: 'members',
+    component: MembersView,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  // ── Fallback ─────────────────────────────────────────────────────
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/login',
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+/**
+ * SCRUM-8: Guard global de rutas.
+ * - requiresAuth → redirige a /login si no hay token
+ * - meta.role → redirige a /403 si el rol no coincide
+ * - Si ya autenticado visita /login → redirige al home
+ */
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  // Ya autenticado intentando ir al login → redirigir al home
+  if (to.meta.public && auth.isAuthenticated) {
+    return next('/')
+  }
+
+  // Ruta protegida sin autenticación
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next('/login')
+  }
+
+  // Ruta restringida por rol
+  if (to.meta.role && auth.user?.role !== to.meta.role) {
+    return next('/403')
+  }
+
+  next()
 })
 
 export default router
